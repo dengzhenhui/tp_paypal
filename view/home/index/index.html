@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>测试购买</h2>
+<script src="https://www.paypal.com/sdk/js?client-id={$client_id}"></script>
+
+<div id="paypal-button-container"></div>
+
+<script>
+    let url_token = "{$url_token}";
+    let cancel_url = "{$cancel_url}";
+    let return_url = "{$return_url}";
+    let s = document.getElementById('paypal-button-container');
+
+    if (s)
+        paypal.Buttons(
+            {
+                // https://developer.paypal.com/docs/checkout/integration-features/standalone-buttons/#
+                fundingSource: paypal.FUNDING.PAYPAL, // 显示paypal 信用卡等支付
+                // 样式 https://developer.paypal.com/docs/checkout/integration-features/customize-button/#
+                // style: {
+                //   label: 'pay',
+                //   height: 35
+                // },
+                onShippingChange: function (data, actions) {
+                    // https://developer.paypal.com/docs/checkout/integration-features/shipping-callback/
+                    // 当收货地址变更时的回调
+                    // 验证您是否支持送货地址。
+                    // 更新运输费用。
+                    // 更改购物车中的订单项。
+                    // 通知买方您不支持其送货地址。
+                },
+                onCancel: function (data,actions) {
+                    console.log('onCancel')
+                    console.log(data)
+                    console.log(actions)
+                //   // 取消支付
+                //   // Show a cancel page, or return to cart
+                //   console.log(data)
+                //   console.log('onCancel')
+                //   let a = document.location.origin + document.location.pathname +'?token='+data.orderID
+                //   window.location.href = a;
+                    //return actions.redirect(document.location.href);
+
+                    return actions.redirect(cancel_url+'?token='+data.orderID);
+                },
+                onError: function (err) {
+                    // 处理错误
+                    console.log(err)
+                    console.log('onError')
+                },
+                createOrder: function (data, actions) {
+                    // 创建订单
+                    console.log('createOrder')
+                    return fetch(url_token, {
+                        headers: {
+                            'content-type': 'application/json'
+                        }
+                    }).then(function (res) {
+                        return res.json();
+                    }).then(function (data) {
+                        console.log(data)
+                        return data.token
+                    });
+                },
+                onApprove: function (data, actions) {
+
+
+                    //支付成功后 会到这个方法
+                    console.log('onApprove')
+                    console.log(data)
+                    console.log(actions)
+                    return actions.redirect(return_url+'?token='+data.orderID);
+                    // data数据是 {orderID: "139029012P5970104", payerID: "7JBL95XU6EAYN", paymentID: null, billingToken: null, facilitatorAccessToken: "A101.e68Uk-4TrEREiIiUUC9mhkMKHBLIc2HIsjc6ekkbfAW9uIiVly59OpdTTPCKs7eY.wTmS-4AlTVGffonQNsCSF_4UjNO"}
+                    // 捕获订单
+                    // return fetch("/home/index/capturingOrder", {
+                    // return fetch(return_url, {
+                    //     method: 'post',
+                    //     headers: {
+                    //         'content-type': 'application/json'
+                    //     },
+                    //     body: JSON.stringify({
+                    //         orderId: data.orderID
+                    //     })
+                    // }).then(function (res) {
+                    //     return res.json();
+                    // }).then(function (details) {
+                    //     console.log(details)
+                    //     // return actions.restart();
+                    // });
+
+                }
+            }
+        ).render('#paypal-button-container');
+</script>
+</body>
+</html>
+
+

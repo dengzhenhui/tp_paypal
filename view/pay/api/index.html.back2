@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Ensures optimal rendering on mobile devices. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/> <!-- Optimal Internet Explorer compatibility -->
+</head>
+
+<body>
+<script src="https://www.paypal.com/sdk/js?client-id={$client_id}"> // Required. Replace SB_CLIENT_ID with your sandbox client ID.
+</script>
+
+
+<div id="paypal-button-container"></div>
+
+<script>
+
+    var FUNDING_SOURCES = [
+        paypal.FUNDING.PAYPAL,
+        paypal.FUNDING.VENMO,
+        paypal.FUNDING.CREDIT,
+        paypal.FUNDING.CARD
+    ];
+
+    // Loop over each funding source / payment method
+    FUNDING_SOURCES.forEach(function(fundingSource) {
+
+        // Initialize the buttons
+        var button = paypal.Buttons({
+            //enableStandardCardFields: true,
+            // https://developer.paypal.com/docs/checkout/integration-features/standalone-buttons/#
+            // fundingSource: paypal.FUNDING.PAYPAL, // 显示paypal 信用卡等支付
+            fundingSource: fundingSource,
+            style: {
+                layout: 'vertical',   // horizontal | vertical <-Must be vertical for APMs
+                size:   'medium',   // medium | large | responsive
+                shape:  'pill',         // pill | rect
+                //color:  'gold',         // gold | blue | silver | black,
+                // fundingicons: false,    // true | false,
+                tagline: false,          // true | false, // 标语
+            },
+            onShippingChange: function(data, actions) { // 送货地址变化后
+                return fetch('/pay/api/shippingChange', {
+                    method: 'post',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body:    JSON.stringify(data)
+                }).then(res => {
+                    if (!res || res.error) {
+                        return actions.reject();
+                    }
+                    return actions.resolve();
+                });
+            },
+            createOrder: function() { // 创建订单支付
+                return fetch('/pay/api/createOrder', {
+                    method: 'post',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({a:1})
+                }).then(function(res) {
+                    return res.json();
+                }).then(function(data) {
+                    return data.orderID; // Use the same key name for order ID on the client and server
+                });
+            },
+            onApprove: function(data) { // 捕获订单交易
+                return fetch('/pay/api/captureOrder', {
+                    method: 'post',
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderID: data.orderID
+                    })
+                }).then(function(res) {
+                    return res.json();
+                }).then(function(details, actions) {
+                    console.log(details);
+                    // 处理资金失败
+                    if (details.error === 'INSTRUMENT_DECLINED') {
+                        console.log(details.error);
+                        return actions.restart(); // 重新支付
+                    }else {
+                        alert('Transaction completed by ' + details.payer.name.given_name);
+                    }
+                })
+            },
+            onCancel: function (data) { // 取消支付
+                console.log('onCancel')
+                console.log(data)
+            },
+            onError: function (err) { // 失败
+                console.log('onError')
+                console.log(err)
+                // Show an error page here, when an error occurs
+            }
+        });
+        // Check if the button is eligible
+        if (button.isEligible()) {
+            // Render the standalone button for that funding source
+            button.render('#paypal-button-container');
+        }
+    });
+
+
+</script>
+
+</body>
+</html>

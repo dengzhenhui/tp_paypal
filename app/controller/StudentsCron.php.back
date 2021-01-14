@@ -1,0 +1,211 @@
+<?php
+
+
+namespace app\controller;
+
+use think\facade\Db;
+use think\facade\Log;
+
+/*********************学生管理系统数据定时任务***************************************/
+class StudentsCron
+{
+    public function http_curl($url, $type = 'get', $res = 'json', $arr = '')
+    {
+        //1.初始化curl
+        $ch = curl_init();
+        //2.设置curl的参数
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //不验证证书
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); //不验证证书
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        if ($type == 'post') {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $arr);
+        }
+        //3.采集
+        $output = curl_exec($ch);
+        //4.关闭
+        curl_close($ch);
+        if ($res == 'json') {
+            return json_decode($output, true);
+        }
+        return [];
+
+//        $json = '[{"record_created_at":"2020-04-22T04:16:54.000Z","email":"joewu815@gmail.com","name":"Jianling Wu","gender":"M","date_of_birth":"1995-10-09","country":"United Kingdom","university":"Blackburn College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-03-31 12:39:55"},{"record_created_at":"2020-04-23T09:31:35.000Z","email":"primeonehing@gmail.com","name":"Calvin Hingle","gender":"M","date_of_birth":"1997-10-18","country":"Australia","university":"university of canberra","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2019-08-28 16:10:13"},{"record_created_at":"2020-04-24T09:26:45.000Z","email":"1930603@brebeuf.qc.ca","name":"Shannon Nseka","gender":"F","date_of_birth":"2002-06-10","country":"Canada","university":"Collège  Jean-de-Brébeuf","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-24 09:26:23"},{"record_created_at":"2020-04-24T20:22:56.000Z","email":"vanessa.s.albuquerque@hotmail.com","name":"Vanessa Silva Albuquerque","gender":"F","date_of_birth":"1998-04-09","country":"Brazil","university":"Centro Universitário Senac - Santo Amaro","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-24 19:23:24"},{"record_created_at":"2020-04-25T01:17:58.000Z","email":"jyhuang@hawaii.edu","name":"JIN YUAN HUANG","gender":"F","date_of_birth":"1996-07-28","country":"United States","university":"University of  Hawaii Mānoa","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2019-11-29 18:12:49"},{"record_created_at":"2020-04-25T08:02:46.000Z","email":"usw.chatchai@gmail.com","name":"Chatchai Ussawinkowit","gender":"M","date_of_birth":"1987-12-27","country":"Thailand","university":"Khon Kaen University","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-25 07:59:46"},{"record_created_at":"2020-04-26T21:37:44.000Z","email":"natnatashenuga@gmail.com","name":"Natasha Ashenuga","gender":"F","date_of_birth":"2000-02-27","country":"United Kingdom","university":"University of York","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2019-11-16 02:05:49"},{"record_created_at":"2020-04-27T16:18:37.000Z","email":"illestgirl01@gmail.com","name":"Alea Zerr","gender":"F","date_of_birth":"2001-07-11","country":"United States","university":"University of South Carolina, Lancaster","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-27 16:16:09"},{"record_created_at":"2020-04-28T05:13:17.000Z","email":"alyssajotaylor@gmail.com","name":"Lyss taylor","gender":"F","date_of_birth":"2017-03-31","country":"United States","university":"Rigby high school","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2018-07-09 01:25:52"},{"record_created_at":"2020-04-29T01:16:09.000Z","email":"melodydai@vuw.ac.nz","name":"Melody Dai","gender":"F","date_of_birth":"1999-03-19","country":"New Zealand","university":"Victoria University of Wellington","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-29 01:12:28"},{"record_created_at":"2020-04-29T04:35:59.000Z","email":"waqas.jeddah@gmail.com","name":"Waqas Javid","gender":"M","date_of_birth":"1982-01-01","country":"Pakistan","university":"Virtual University Of Pakistan","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-29 01:54:24"},{"record_created_at":"2020-04-30T13:38:44.000Z","email":"nmiguel611@gmail.com","name":"Nuno henriques","gender":"M","date_of_birth":"1996-11-06","country":"Portugal","university":"Instituto Politécnico de Leiria","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-30 13:38:24"},{"record_created_at":"2020-05-02T02:22:04.000Z","email":"rosie.novak39@student.plattcollege.edu","name":"Rosie Novak","gender":"F","date_of_birth":"1998-10-01","country":"United States","university":"Platt College","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-02 02:20:59"},{"record_created_at":"2020-05-02T08:19:30.000Z","email":"muddu.salian@gmail.com","name":"Muddu Madakyaru","gender":"M","date_of_birth":"1970-07-15","country":"India","university":"Manipal University","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-02 08:12:09"},{"record_created_at":"2020-05-02T08:37:32.000Z","email":"jacintabarbara2003@live.com","name":"Jacinta Agostino","gender":"F","date_of_birth":"2003-05-23","country":"Australia","university":"Balcatta Senior high school","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-02 08:35:14"},{"record_created_at":"2020-05-02T12:46:36.000Z","email":"500066808@stu.upes.ac.in","name":"SANJANA SUNIL","gender":"F","date_of_birth":"2000-06-28","country":"India","university":"University of Petroleum and Energy Studies","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-02 12:44:41"},{"record_created_at":"2020-05-02T17:49:29.000Z","email":"civibes@hotmail.com","name":"Miguel Reyes","gender":"M","date_of_birth":"1996-01-31","country":"United States","university":"Atlantic University College","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-02 17:47:40"},{"record_created_at":"2020-05-03T12:32:13.000Z","email":"dean.p.owen@gmail.com","name":"Dean Owen","gender":"M","date_of_birth":"1991-01-28","country":"United Kingdom","university":"Wiltshire College \u0026 University Centre","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-30 12:52:40"},{"record_created_at":"2020-05-03T20:19:55.000Z","email":"zakiyyah10harris@gmail.com","name":"K_ Thiccemez","gender":"NA","date_of_birth":null,"country":"United States","university":"Fultondale High School","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-03-22 04:38:50"},{"record_created_at":"2020-05-04T03:44:33.000Z","email":"jcalhoun751@icloud.com","name":"Justin Calhoun","gender":"M","date_of_birth":"1999-12-07","country":"United States","university":"Southern New Hampshire University","grad_year":2024,"marketing_consent":1,"marketing_consent_updated_at":"2018-08-02 03:47:24"},{"record_created_at":"2020-05-04T23:38:02.000Z","email":"l30650@alunos.uevora.pt","name":"Ana Amado","gender":"F","date_of_birth":"1994-05-24","country":"Portugal","university":"Universidade de Évora","grad_year":2023,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-04 23:36:54"},{"record_created_at":"2020-05-05T22:51:26.000Z","email":"fanimationmik@gmail.com","name":"Michael Lewallen","gender":"M","date_of_birth":"1993-06-14","country":"United States","university":"Laney College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-05 22:48:57"},{"record_created_at":"2020-05-06T01:17:21.000Z","email":"cperez@fandm.edu","name":"Cheska Mae Perez","gender":"F","date_of_birth":"1997-10-24","country":"United States","university":"Franklin \u0026 Marshall College","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-04-05 22:09:18"},{"record_created_at":"2020-05-06T10:49:33.000Z","email":"siripong.s@psu.ac.th","name":"Siripong Siriwan","gender":"M","date_of_birth":"1974-05-16","country":"Thailand","university":"Prince of Songkla University","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-06 10:44:10"},{"record_created_at":"2020-05-06T15:19:07.000Z","email":"jibrealmoore@gmail.com","name":"Jibrael Moore","gender":"M","date_of_birth":"2002-05-16","country":"United States","university":"Germantown Academy","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-06 15:17:27"},{"record_created_at":"2020-05-07T22:00:08.000Z","email":"reginabelle22@yahoo.ca","name":"Regina Belle Parmanand","gender":"F","date_of_birth":"2001-10-22","country":"Canada","university":"Seneca College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-07 21:55:22"},{"record_created_at":"2020-05-09T00:38:16.000Z","email":"shaun.moffett@student.tafesa.edu.au","name":"Shaun Moffett","gender":"M","date_of_birth":"2001-12-30","country":"Australia","university":"Adelaide College of the Arts","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-09 00:35:41"},{"record_created_at":"2020-05-10T06:59:04.000Z","email":"mkjha482@gmail.com","name":"Mayank Jha","gender":"M","date_of_birth":"2000-09-19","country":"India","university":"University of Petroleum and Energy Studies","grad_year":2023,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-10 06:58:46"},{"record_created_at":"2020-05-11T04:58:49.000Z","email":"riverabs21@cdhylton.com","name":"Bladimir Rivera Garcia","gender":"M","date_of_birth":"2002-11-11","country":"United States","university":"CD Hylton High School","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-11 04:58:16"},{"record_created_at":"2020-05-11T21:03:16.000Z","email":"faithchea@gmail.com","name":"faith chea","gender":"F","date_of_birth":"1999-02-22","country":"United States","university":"Fashion Institute of Technology","grad_year":2023,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-11 21:04:00"},{"record_created_at":"2020-05-11T23:31:48.000Z","email":"aj.victoriano99@gmail.com","name":"AJ Victoriano","gender":"M","date_of_birth":"1999-12-11","country":"United States","university":"The University of Texas at San Antonio","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-11 23:31:00"},{"record_created_at":"2020-05-11T23:43:41.000Z","email":"hr23122@email.vccs.edu","name":"Hamnah Rizwan","gender":"F","date_of_birth":"2001-12-20","country":"United States","university":"Northern Virginia Community College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-11 23:42:28"},{"record_created_at":"2020-05-12T17:52:43.000Z","email":"hsud@sagehillschool.org","name":"David Hsu","gender":"M","date_of_birth":"1974-03-03","country":"United States","university":"Sage Hill School","grad_year":2026,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-12 17:36:46"},{"record_created_at":"2020-05-13T04:52:03.000Z","email":"bridgetsmith714@gmail.com","name":"Bridget Smith","gender":"F","date_of_birth":"1999-11-26","country":"Australia","university":"Griffith University","grad_year":2025,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-13 04:49:23"},{"record_created_at":"2020-05-13T16:50:00.000Z","email":"sophieormr@gmail.com","name":"Sophie Orme","gender":"F","date_of_birth":"2000-11-30","country":"United Kingdom","university":"Staffordshire University","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2019-07-22 19:20:15"},{"record_created_at":"2020-05-13T21:48:25.000Z","email":"animacion3d@misena.edu.co","name":"Daniel Martínez","gender":"M","date_of_birth":"1981-01-29","country":"Colombia","university":"Pontifical Bolivarian University","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-13 21:46:52"},{"record_created_at":"2020-05-14T01:40:32.000Z","email":"ryanjohn2009@hotmail.co.uk","name":"Ryan Gusman","gender":"NA","date_of_birth":null,"country":"United Kingdom","university":"Bournemouth University","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2019-02-07 05:57:54"},{"record_created_at":"2020-05-14T13:38:09.000Z","email":"6171801002@student.unpar.ac.id","name":"Matthew F","gender":"M","date_of_birth":"2000-05-03","country":"Indonesia","university":"Universitas Katolik Parahyangan","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-14 13:36:00"},{"record_created_at":"2020-05-15T04:51:45.000Z","email":"braelynnpharris@gmail.com","name":"Brae\'Lynn Harris","gender":"F","date_of_birth":"1998-12-09","country":"United States","university":"Long  Beach City College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-15 04:51:23"},{"record_created_at":"2020-05-15T12:40:09.000Z","email":"aannisathahirah@gmail.com","name":"Annisa Aqilah","gender":"F","date_of_birth":"1999-12-31","country":"Indonesia","university":"Universitas Pertamina","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-12 16:41:33"},{"record_created_at":"2020-05-15T17:47:56.000Z","email":"mbabara074@insite.4cd.edu","name":"marys  babara","gender":"F","date_of_birth":"2000-12-27","country":"United States","university":"Los Medanos Community College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-15 17:45:05"},{"record_created_at":"2020-05-15T19:43:49.000Z","email":"nikitachavan214@gmail.com","name":"Nikita Chavan ","gender":"F","date_of_birth":"2000-06-15","country":"India","university":"Dr. Babasaheb Ambedkar College of Arts, Science \u0026 Commerce","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-14 09:32:09"},{"record_created_at":"2020-05-15T23:40:51.000Z","email":"sledd7485@student.cptc.edu","name":"LEE D Sledd","gender":"NA","date_of_birth":null,"country":"United States","university":"Clover Park Technical College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2019-08-09 14:47:25"},{"record_created_at":"2020-05-16T00:53:14.000Z","email":"mk864@cornell.edu","name":"Mira Kim","gender":"F","date_of_birth":"1997-11-20","country":"United States","university":"Cornell University","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-16 00:52:28"},{"record_created_at":"2020-05-16T02:45:28.000Z","email":"velez.d997308@stu.sanjac.edu","name":"Diamonndlee Velez","gender":"F","date_of_birth":"1999-05-13","country":"United States","university":"San Jacinto College","grad_year":2020,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-16 02:43:03"},{"record_created_at":"2020-05-17T05:46:53.000Z","email":"nicholasgoht@gmail.com","name":"Nicholas Goh","gender":"M","date_of_birth":"2001-07-27","country":"Australia","university":"JMC Academy","grad_year":2021,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-17 05:45:38"},{"record_created_at":"2020-05-17T09:02:28.000Z","email":"ewang4@calstatela.edu","name":"Elaine Wang","gender":"F","date_of_birth":"1999-12-17","country":"United States","university":"California State University, Los Angeles","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-17 09:01:28"},{"record_created_at":"2020-05-17T20:54:16.000Z","email":"mjdidomenico0001@student.stcc.edu","name":"Matthew DiDomenico","gender":"M","date_of_birth":"1998-01-20","country":"United States","university":"Springfield Technical Community College","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-17 20:53:12"},{"record_created_at":"2020-05-19T11:44:25.000Z","email":"jigeshprismstone@gmail.com","name":"Jigesh Chhangani ","gender":"M","date_of_birth":"2001-08-04","country":"India","university":"National Institute of Fashion Technology","grad_year":2023,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-19 11:42:08"},{"record_created_at":"2020-05-20T08:26:31.000Z","email":"maix0705@osloskolen.no","name":"Mai Luong","gender":"F","date_of_birth":"2003-05-07","country":"Norway","university":"Elvebakken videregående skole","grad_year":2022,"marketing_consent":1,"marketing_consent_updated_at":"2020-05-20 08:24:35"}]';
+//
+//        return json_decode($json, true);
+    }
+
+//Huion Canada
+//access_token: 40a1c9a72fdf2948e29ac87331cf5a88bcfaafd06fb069867dfb00b28ea8d1f0
+//brand_uid: 5e1b2ffd-a50c-4720-8b37-abbfffe90f5f
+//--------------------------
+//Huion United Kingdom
+//access_token: 196a182600342c64a9c11f80d678d2cc270dc2f905e11dda41ff8eb2b24031ba
+//brand_uid: 7dbcd7d3-d3b8-41b5-9495-fe6888ab4c9b
+//--------------------------
+//Huion United States
+//access_token: 96cbd31ac74072d93a51f22bdc5c43dd5d941861404054a84a400fc91e3d0c78
+//brand_uid: 4f53caf0-d0b1-41ec-ae01-f1df7b79596d
+//--------------------------
+//Huion Japan
+//access_token: 40dcd18f91df03f4a15cdc94aefa814a144508919741ff6aa0aaa460c90a0da0
+//brand_uid: c984215f-7c4f-4bc3-9799-65cad52a002d
+
+    public function main()
+    {
+        set_time_limit(0);
+        $this->getCanada();
+        $this->getUnitedKingdom();
+        $this->getUnitedStates();
+        $this->getJapan();
+    }
+
+    public function getCanada()
+    {
+        //set_time_limit(0);
+
+        $access_token = '40a1c9a72fdf2948e29ac87331cf5a88bcfaafd06fb069867dfb00b28ea8d1f0';
+        $brand_uid = '5e1b2ffd-a50c-4720-8b37-abbfffe90f5f';
+
+        // 一年前
+        $startYmd = date("Y-m-d", strtotime("+1 day", strtotime("-1 year")));
+        $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+        $formatUrl = 'https://api.studentbeans.com/offers/api/v1/data/leads?access_token=%s&brand_uid=%s&start_date=%s&end_date=%s';
+        while (true) {
+            $url = sprintf($formatUrl, $access_token, $brand_uid, $startYmd, $endYmd);
+            $res = $this->http_curl($url);
+            if (empty($res) || isset($res['error'])){
+                Log::error('getCanada-' . json_encode($res));
+            }else {
+                //$this->append('huion-canada.txt', $res);
+                $this->insertStudentsData($res, 'canada_students');
+            }
+            $startYmd = $endYmd;
+            $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+            //var_dump($startYmd.'---'.$endYmd);
+            if (strtotime($startYmd) >= time()) break;
+        }
+    }
+
+    public function getUnitedKingdom()
+    {
+        //set_time_limit(0);
+
+        $access_token = '196a182600342c64a9c11f80d678d2cc270dc2f905e11dda41ff8eb2b24031ba';
+        $brand_uid = '7dbcd7d3-d3b8-41b5-9495-fe6888ab4c9b';
+
+        // 一年前
+        $startYmd = date("Y-m-d", strtotime("+1 day", strtotime("-1 year")));
+        $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+        $formatUrl = 'https://api.studentbeans.com/offers/api/v1/data/leads?access_token=%s&brand_uid=%s&start_date=%s&end_date=%s';
+        while (true) {
+            $url = sprintf($formatUrl, $access_token, $brand_uid, $startYmd, $endYmd);
+            $res = $this->http_curl($url);
+
+            if (empty($res) || isset($res['error'])){
+                Log::error('getUnitedKingdom-' . json_encode($res));
+            }else {
+                //$this->append('huion-canada.txt', $res);
+                $this->insertStudentsData($res, 'united_kingdom_students');
+            }
+
+            $startYmd = $endYmd;
+            $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+            //var_dump($startYmd.'---'.$endYmd);
+            if (strtotime($startYmd) >= time()) break;
+        }
+    }
+
+    public function getUnitedStates()
+    {
+        //set_time_limit(0);
+
+        $access_token = '96cbd31ac74072d93a51f22bdc5c43dd5d941861404054a84a400fc91e3d0c78';
+        $brand_uid = '4f53caf0-d0b1-41ec-ae01-f1df7b79596d';
+
+        // 一年前
+        $startYmd = date("Y-m-d", strtotime("+1 day", strtotime("-1 year")));
+        $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+        $formatUrl = 'https://api.studentbeans.com/offers/api/v1/data/leads?access_token=%s&brand_uid=%s&start_date=%s&end_date=%s';
+        while (true) {
+            $url = sprintf($formatUrl, $access_token, $brand_uid, $startYmd, $endYmd);
+            $res = $this->http_curl($url);
+            if (empty($res) || isset($res['error'])){
+                Log::error('getUnitedStates-' . json_encode($res));
+            }else {
+                //$this->append('huion-canada.txt', $res);
+                $this->insertStudentsData($res, 'united_states_students');
+            }
+            $startYmd = $endYmd;
+            $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+            if (strtotime($startYmd) >= time()) break;
+        }
+    }
+
+    public function getJapan()
+    {
+        //set_time_limit(0);
+
+        $access_token = '40dcd18f91df03f4a15cdc94aefa814a144508919741ff6aa0aaa460c90a0da0';
+        $brand_uid = 'c984215f-7c4f-4bc3-9799-65cad52a002d';
+
+        // 一年前
+        $startYmd = date("Y-m-d", strtotime("+1 day", strtotime("-1 year")));
+        $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+        $formatUrl = 'https://api.studentbeans.com/offers/api/v1/data/leads?access_token=%s&brand_uid=%s&start_date=%s&end_date=%s';
+        while (true) {
+            $url = sprintf($formatUrl, $access_token, $brand_uid, $startYmd, $endYmd);
+            $res = $this->http_curl($url);
+
+            if (empty($res) || isset($res['error'])){
+                Log::error('getJapan-' . json_encode($res));
+            }else {
+                //$this->append('huion-canada.txt', $res);
+                $this->insertStudentsData($res, 'japan_students');
+            }
+            $startYmd = $endYmd;
+            $endYmd = date("Y-m-d", strtotime("+30 day", strtotime($startYmd)));
+            if (strtotime($startYmd) >= time()) break;
+        }
+    }
+
+    public function append($filename, $data)
+    {
+        $myfile = fopen($filename, "a+") or die("Unable to open file!");
+        $data = $data . "\r\n";
+        fwrite($myfile, $data);
+        //记得关闭流
+        fclose($myfile);
+    }
+
+
+    public function insertStudentsData($data, $tableName)
+    {
+        //$this->append($tableName . '.txt', json_encode($data) . '\r\n');
+        //date_default_timezone_set('GMT');
+        $newData = [];
+        foreach ($data as $k => $v) {
+            $id = Db::table($tableName)->field('id')->where(['email' => $v['email']])->find();
+            if (!$id) {
+                $newData[] = [
+                    'email' => $v['email'],
+                    'name' => $v['name'],
+                    'gender' => $v['gender'],
+                    'date_of_birth' => $v['date_of_birth'],
+                    'country' => $v['country'],
+                    'university' => $v['university'],
+                    'grad_year' => $v['grad_year'],
+                    'marketing_consent' => $v['marketing_consent'],
+                    'marketing_consent_updated_at' => $v['marketing_consent_updated_at'],
+                    'record_created_at' => date('Y-m-d H:i:s', strtotime($v['record_created_at'])),
+                    'create_time' => date('Y-m-d H:i:s',time())
+                ];
+            }
+        }
+        if (!empty($newData)) {
+            Db::table($tableName)->data($newData)->insertAll();
+        }
+    }
+
+}
