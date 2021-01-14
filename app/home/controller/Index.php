@@ -13,25 +13,28 @@ class Index
 
     public function index()
     {
+        $client_id = 'sandbox' === Config::get('paypal.environment')
+            ? Config::get('paypal.sandbox.client_id')
+            : Config::get('paypal.live.client_id');
         View::assign([
-            'client_id'=> Config::get('paypal.client_id'),
-            'url_token'  => $this->baseUrl.'/home/index/createOrder',
-            'cancel_url'=> $this->baseUrl.'/home/index/cancel',
-            'return_url'=> $this->baseUrl.'/home/index/ecValidation'
+            'client_id' => $client_id,
+            'create_order_url' => $this->baseUrl . '/Home/Paypal/createOrder',
+            'order_cancel_url' => $this->baseUrl . Config::get('paypal.cancel_url'),
+            'order_return_url' => $this->baseUrl . Config::get('paypal.return_url')
         ]);
         // 模板输出
         return View::fetch('index');
     }
 
-    public function createOrder()
+    public function createPaypalOrder()
     {
-        $cancel_url = $this->baseUrl.'/home/index/cancel';
-        $return_url = $this->baseUrl.'/home/index/ecValidation';
+        $cancel_url = $this->baseUrl . '/home/index/cancel';
+        $return_url = $this->baseUrl . '/home/index/ecValidation';
         $paypal = new Paypal();
         $cres = $paypal->createOrder($cancel_url, $return_url);
         $orderId = $cres->result->id;
 //        $this->approveOrder($orderId);
-        return json(['success'=>true, 'token'=>$orderId]);
+        return json(['success' => true, 'token' => $orderId]);
 
     }
 
@@ -49,7 +52,7 @@ class Index
     public function approveOrder($orderId)
     {
         $client = new Client();
-        $response = $client->request('GET', 'https://www.sandbox.paypal.com/checkoutnow?token='.$orderId);
+        $response = $client->request('GET', 'https://www.sandbox.paypal.com/checkoutnow?token=' . $orderId);
 
 //        echo $response->getStatusCode(); // 200
 //        echo $response->getHeaderLine('content-type'); // 'application/json; charset=utf8'
@@ -57,18 +60,21 @@ class Index
 
         return $response;
     }
+
     // https://www.sandbox.paypal.com/checkoutnow?token=57F51171VL751693S
 
 
     public function ecValidation()
     {
         var_dump(input());
-        var_dump("ecValidation");die;
+        var_dump("ecValidation");
+        die;
     }
 
     public function cancel()
     {
-        var_dump('cancel');die;
+        var_dump('cancel');
+        die;
     }
 
     public function test()

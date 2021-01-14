@@ -1,14 +1,15 @@
 <?php
 
+
 namespace app\home\controller;
 
-use PayPalHttp\HttpException;
-use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
-use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
-use Sample\PayPalClient;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
+use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
+use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
+use PayPalHttp\HttpException;
 use think\facade\Config;
+
 
 class Paypal
 {
@@ -17,50 +18,64 @@ class Paypal
     public function __construct()
     {
         // Creating an environment
-        $clientId = Config::get('paypal.client_id');
-        $clientSecret = Config::get('paypal.client_secret');
-        $environment = new SandboxEnvironment($clientId, $clientSecret);
+        if ('sandbox' === Config::get('paypal.environment')) {
+            $clientId = Config::get('paypal.sandbox.client_id');
+            $clientSecret = Config::get('paypal.sandbox.client_secret');
+            $environment = new SandboxEnvironment($clientId, $clientSecret);
+        } else {
+            $clientId = Config::get('paypal.live.client_id');
+            $clientSecret = Config::get('paypal.live.client_secret');
+            $environment = new ProductionEnvironment($clientId, $clientSecret);
+        }
         $this->client = new PayPalHttpClient($environment);
     }
 
-    public function createOrder($cancel_url, $return_url)
+    public function createOrder()
     {
+        // Construct a request object and set desired parameters
+        // Here, OrdersCreateRequest() creates a POST request to /v2/checkout/orders
         $request = new OrdersCreateRequest();
-        //$request->prefer('return=representation');
+        $request->prefer('return=representation');
         $request->body = [
             "intent" => "CAPTURE",
             "purchase_units" => [[
+                "reference_id" => "test_ref_id1",
                 "amount" => [
-                    "value" => "1.00",
+                    "value" => "100.00",
                     "currency_code" => "USD"
                 ]
             ]],
             "application_context" => [
-                "cancel_url" => $cancel_url,
-                "return_url" => $return_url
+                "cancel_url" => Config::get('paypal.cancel_url'),
+                "return_url" => Config::get('paypal.return_url')
             ]
         ];
+
         try {
+            // Call API with your client and get a response for your call
             $response = $this->client->execute($request);
-            return $response;
+
+            // If call returns body in response, you can get the deserialized version from the result attribute of the response
+            print_r($response);
         } catch (HttpException $ex) {
             echo $ex->statusCode;
             print_r($ex->getMessage());
         }
     }
 
-    public function capturingOrder($orderId)
+    /**
+     * 交易关闭 应该返回的页面
+     */
+    public function cancelOrder()
     {
-        $request = new OrdersCaptureRequest($orderId);
-        $request->prefer('return=representation');
-        try {
-            // Call API with your client and get a response for your call
-            $response = $this->client->execute($request);
-            // If call returns body in response, you can get the deserialized version from the result attribute of the response
-            return $response;
-        } catch (HttpException $ex) {
-            echo $ex->statusCode;
-            print_r($ex->getMessage());
-        }
+
+    }
+
+    /**
+     * 同步回到
+     */
+    public function returnOrder()
+    {
+
     }
 }
